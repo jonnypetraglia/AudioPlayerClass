@@ -103,7 +103,18 @@ double AudioPlayerWin::progress() const
 
 void AudioPlayerWin::play()
 {
-    std::string s =  "play " + alias + " notify";
+    std::string s;
+    if(isPaused())
+    {
+        s = "resume " + alias;
+        const char* c = s.c_str();
+        int err = mciSendStringA(c, NULL, 0, 0);
+        if(err>0)
+            std::cerr << "MCI ERROR when resuming: " << err << std::endl;
+        return;
+    }
+
+    s =  "play " + alias + " notify";
     const char* c = s.c_str();
     int err = mciSendStringA(c, NULL, 0, finishListener->getCallbackHWND());
     if(err>0)
@@ -113,14 +124,8 @@ void AudioPlayerWin::play()
 void AudioPlayerWin::pause()
 {
     std::string s;
-    if(isPaused())
-    {
-        s = "resume " + alias;
-        const char* c = s.c_str();
-        int err = mciSendStringA(c, NULL, 0, 0);
-        if(err>0)
-            std::cerr << "MCI ERROR when resuming: " << err << std::endl;
-    }
+    if(isPaused()||isStopped())
+        return;
     else
     {
         s = "pause " + alias;
