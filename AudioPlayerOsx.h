@@ -1,10 +1,12 @@
 #ifndef AUDIOPLAYEROSX_H
 #define AUDIOPLAYEROSX_H
 
-#include "AudioPlayer.h"
+//USAGE: DO NOT INCLUDE THIS FILE! Include 'AudioPlayerFactory' and use its "file()" function
+
 #include <AudioToolbox/AudioToolbox.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <iostream>
+#include "AudioPlayer.h"
 
 class AudioPlayerOsx : public AudioPlayer {
 public:

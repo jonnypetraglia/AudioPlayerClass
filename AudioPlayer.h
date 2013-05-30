@@ -1,5 +1,7 @@
-#ifndef EPOXY_AUDIOPLAYER_H
-#define EPOXY_AUDIOPLAYER_H
+#ifndef AUDIOPLAYER_H
+#define AUDIOPLAYER_H
+
+//USAGE: DO NOT INCLUDE THIS FILE! Include 'AudioPlayerFactory' and use its "file()" function
 
 /*NEED:
  *  -Play
@@ -27,10 +29,9 @@ public:
     virtual bool isStopped() const = 0;
     virtual double duration() const = 0;
     virtual double progress() const = 0;
-    
-//    virtual AudioPlayer* file(const char *fn);
+
     virtual void setFinishListener(AudioPlayerCallback* cbo) = 0;
 };
 
 
-#endif
+#endif // AUDIOPLAYER_H
