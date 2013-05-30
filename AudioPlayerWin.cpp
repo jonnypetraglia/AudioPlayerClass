@@ -78,7 +78,7 @@ bool AudioPlayerWin::isStopped() const
 double AudioPlayerWin::duration() const
 {
     char mcidata[129]; // Data is returned by some MCI requests
-    std::string s ="status " + alias + " length";
+    std::string s = "status " + alias + " length";
     const char* c = s.c_str();
     mciSendStringA(c, mcidata, 128, 0);
     std::istringstream i(mcidata);
@@ -91,7 +91,7 @@ double AudioPlayerWin::duration() const
 double AudioPlayerWin::progress() const
 {
     char mcidata[129]; // Data is returned by some MCI requests
-    std::string s = "status " + alias + " position";
+    std::string s =  "status " + alias + " position";
     const char* c = s.c_str();
     mciSendStringA(c, mcidata, 128, 0);
     std::istringstream i(mcidata);
@@ -103,11 +103,11 @@ double AudioPlayerWin::progress() const
 
 void AudioPlayerWin::play()
 {
-    std::string s = "play " + alias + " notify";
+    std::string s =  "play " + alias + " notify";
     const char* c = s.c_str();
     int err = mciSendStringA(c, NULL, 0, finishListener->getCallbackHWND());
     if(err>0)
-        std::cerr << "MCI ERROR when playing: " << err << std::endl;
+        std::cerr << "MCI ERROR when playing: " << err << " [" << alias << "] " << std::endl;
 }
 
 void AudioPlayerWin::pause()
@@ -164,7 +164,8 @@ bool AudioPlayerWin::LoadMP3(std::string &command)
     {
         command.replace(pos,1,"\\~");
         pos = command.find('~', pos+2);
-    }//*/
+    }
+
     command = "open \"" + command + "\" type mpegvideo alias " + alias;
     std::cout << command << std::endl;
     return mciSendStringA(command.c_str(), NULL, 0, 0)==0;
