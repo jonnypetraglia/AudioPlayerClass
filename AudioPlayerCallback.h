@@ -7,19 +7,23 @@
 #include <windows.h>
 class AudioPlayerCallback
 {
-    //typedef HWND int;
 protected:
     HWND callbackHWND;
 public:
     HWND getCallbackHWND() { return callbackHWND; }
     void setCallbackHWND(const HWND &h) { callbackHWND = h; }
+
+    virtual void playingFinished() = 0;
 };
+
 #else
+
 class AudioPlayerCallback
 {
 public:
-    virtual void playingFinished();
+    virtual void playingFinished() = 0;
 };
+
 #endif
 
 #endif
