@@ -22,7 +22,7 @@ public:
 
     virtual void play() = 0;
     virtual void pause() = 0;
-    virtual void seek(double t) = 0 ;
+    virtual void seek(double t) = 0;
 
     virtual bool isPlaying() const = 0;
     virtual bool isPaused() const = 0;
