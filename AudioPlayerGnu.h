@@ -13,7 +13,7 @@ private:
     GstElement *pipeline;
     GstElement *videosink;
     gpointer window;
-    GstSeekFlags seek_flags = (GstSeekFlags) (GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT);
+#define seek_flags (GST_SEEK_FLAG_FLUSH|GST_SEEK_FLAG_KEY_UNIT)
     AudioPlayerCallback* finishListener;
 
 private:
@@ -37,6 +37,8 @@ private:
             g_error_free(err);
             std::cerr << "ERROR" << std::endl;
             break;
+        default:
+            break;
         }
         return TRUE;
     }
@@ -53,7 +55,7 @@ private:
 
     void reset()
     {
-        gst_element_seek(pipeline, 1.0, GST_FORMAT_TIME, seek_flags, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
+        gst_element_seek(pipeline, 1.0, GST_FORMAT_TIME, (GstSeekFlags) seek_flags, GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
     }
 
 
@@ -92,7 +94,7 @@ public:
         gst_element_seek(pipeline,          //pipeline element
                          1.0,               //rate
                          GST_FORMAT_TIME,   //GstFormat?
-                         seek_flags,        //flags??
+                         (GstSeekFlags) seek_flags,        //flags??
                          GST_SEEK_TYPE_SET, //start_type; if you want it to start
                          value * GST_MSECOND,//Time to seek to
                          GST_SEEK_TYPE_NONE,//
@@ -101,7 +103,7 @@ public:
     void seekAbsolute(double t)
     {
         guint64 value = t;
-        gst_element_seek(pipeline, 1.0, GST_FORMAT_TIME, seek_flags, GST_SEEK_TYPE_SET,
+        gst_element_seek(pipeline, 1.0, GST_FORMAT_TIME, (GstSeekFlags) seek_flags, GST_SEEK_TYPE_SET,
                          value,
                          GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
     }
@@ -208,12 +210,11 @@ public:
         gst_element_set_state(a->pipeline, GST_STATE_PAUSED); //Have to pause first to test if it is a valid file
         GstState current, pending;
         GstStateChangeReturn isValidFile = gst_element_get_state(a->pipeline, &current, &pending,0);
-        std::cout << current << "|" << pending << "=" << isValidFile << std::endl;
+
         if(!isValidFile)
         {
             delete a; return NULL;
         }
-        //*/
 
         return a;
     }
@@ -221,6 +222,11 @@ public:
     void setFinishListener(AudioPlayerCallback* cbo)
     {
         finishListener = cbo;
+    }
+
+    void setVolume(int percentage)  //percentage ranges 0 to 100
+    {
+        g_object_set(G_OBJECT(pipeline), "volume", percentage/10.0/2, NULL); //range from 1.0 to 10.0???
     }
 };
 

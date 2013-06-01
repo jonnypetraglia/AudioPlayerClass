@@ -5,7 +5,7 @@
 
 #include "AudioPlayer.h"
 
-#ifdef _WIN32 || _WIN64
+#ifdef _WIN32
     #include "AudioPlayerWin.h"
 #elif __APPLE__
     #include "AudioPlayerOsx.h"

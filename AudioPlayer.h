@@ -30,6 +30,11 @@ public:
     virtual double duration() const = 0;
     virtual double progress() const = 0;
 
+    virtual void setVolume(int) = 0;
+//    virtual void mute() const = 0;
+//    virtual void unmute() const = 0;
+//    virtual void toggleMute() const = 0;
+
     virtual void setFinishListener(AudioPlayerCallback* cbo) = 0;
 };
 
