@@ -14,6 +14,7 @@ private:
     GstElement *videosink;
     gpointer window;
     GstSeekFlags seek_flags = (GstSeekFlags) (GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT);
+    AudioPlayerCallback* finishListener;
 
 private:
     //Has to be static???
@@ -22,6 +23,9 @@ private:
         switch(GST_MESSAGE_TYPE(msg))
         {
         case GST_MESSAGE_EOS:
+            if(((AudioPlayerGnu*)data)->finishListener)
+              ((AudioPlayerGnu*)data)->finishListener->playingFinished();
+            gst_element_set_state(((AudioPlayerGnu*)data)->pipeline, GST_STATE_READY);
             g_debug("end-of-stream");
             break;
         case GST_MESSAGE_ERROR:
@@ -31,6 +35,8 @@ private:
             g_free(debug);
             g_warning("Error: %s", err->message);
             g_error_free(err);
+            std::cerr << "ERROR" << std::endl;
+            break;
         }
         return TRUE;
     }
@@ -54,45 +60,13 @@ private:
 public:
     ~AudioPlayerGnu()
     {
-
+        //TODO???
+        //delete pipeline;
+        //delete videosink;
     }
     void play()
     {
         //stop();
-        pipeline = gst_element_factory_make("playbin", "gst-player");
-        videosink = gst_element_factory_make("xvimagesink", "videosink");
-
-        g_object_set(G_OBJECT(pipeline), "video-sink", videosink, NULL);
-
-        {
-            GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(pipeline));
-            gst_bus_add_watch(bus, bus_callback, NULL);
-            gst_object_unref(bus);
-        }
-
-        {
-            gchar *uri;
-            if(gst_uri_is_valid(filename))
-            {
-                uri = g_strdup(filename);
-            }
-            else if(g_path_is_absolute(filename))
-            {
-                uri = g_filename_to_uri(filename, NULL, NULL);
-            }
-            else
-            {
-                gchar *tmp = g_build_filename(g_get_current_dir(), filename, NULL);
-                uri = g_filename_to_uri(tmp, NULL, NULL);
-                g_free(tmp);
-            }
-
-            g_debug("%s", uri); //Printing
-            g_object_set(G_OBJECT(pipeline), "uri", uri, NULL);
-            g_free(uri);
-        }
-        g_object_set(G_OBJECT(videosink), "force-aspect-ratio", TRUE, NULL);
-
         if(GST_IS_X_OVERLAY(videosink))
             gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(videosink), GPOINTER_TO_INT(window));
         gst_element_set_state(pipeline, GST_STATE_PLAYING);
@@ -115,9 +89,14 @@ public:
     void seek(double t)
     {
         gint value = t;
-        gst_element_seek(pipeline, 1.0, GST_FORMAT_TIME, seek_flags, GST_SEEK_TYPE_SET,
-                         value * GST_SECOND,
-                         GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
+        gst_element_seek(pipeline,          //pipeline element
+                         1.0,               //rate
+                         GST_FORMAT_TIME,   //GstFormat?
+                         seek_flags,        //flags??
+                         GST_SEEK_TYPE_SET, //start_type; if you want it to start
+                         value * GST_MSECOND,//Time to seek to
+                         GST_SEEK_TYPE_NONE,//
+                         GST_CLOCK_TIME_NONE);
     }
     void seekAbsolute(double t)
     {
@@ -127,22 +106,7 @@ public:
                          GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
     }
 
-    bool isPlaying() const
-    {
-
-    }
-
-    bool isPaused() const
-    {
-
-    }
-
-    bool isStopped() const
-    {
-
-    }
-
-    double duration()
+    double duration() const
     {
         GstFormat format = GST_FORMAT_TIME;
         gint64 cur;
@@ -162,14 +126,101 @@ public:
         return cur;
     }
 
-    void setFinishListener(AudioPlayerCallback* cbo)
-    {
 
+    bool isPlaying() const
+    {
+        GstState current, pending;
+        gst_element_get_state(pipeline, &current, &pending,0);
+        std::cout << "derp " << current << "==" << GST_STATE_PLAYING << " (" << pending << ")" << std::endl;
+        return current==GST_STATE_PLAYING;
     }
+
+    bool isPaused() const
+    {
+        GstState current, pending;
+        gst_element_get_state(pipeline, &current, &pending,0);
+        std::cout << "derp " << current << "==" << GST_STATE_PAUSED << " (" << pending << ")" << std::endl;
+        return current==GST_STATE_PAUSED;
+    }
+
+    bool isStopped() const
+    {
+        GstState current, pending;
+        gst_element_get_state(pipeline, &current, &pending,0);
+        std::cout << "derp " << current << "==" << GST_STATE_NULL << " (" << pending << ")" << std::endl;
+        return current==GST_STATE_NULL;
+    }
+
+    /*GstElement:
+     *  GST_STATE_VOID_PENDING = 0
+     *  GST_STATE_NULL = 1
+     *  GST_STATE_READY = 2
+     *  GST_STATE_PAUSED = 3
+     *  GST_STATE_PLAYING = 4
+     */
 
     static AudioPlayerGnu* file(const char *fn)
     {
+        AudioPlayerGnu* a = new AudioPlayerGnu();
+        a->init(NULL, NULL);
+        a->filename = fn;
+        a->pipeline = gst_element_factory_make("playbin", "gst-player");
+        a->videosink = gst_element_factory_make("xvimagesink", "videosink");
 
+        g_object_set(G_OBJECT(a->pipeline), "video-sink", a->videosink, NULL);
+
+        {
+            GstBus *bus = gst_pipeline_get_bus(GST_PIPELINE(a->pipeline));
+            gst_bus_add_watch(bus, bus_callback, gpointer(a));
+            gst_object_unref(bus);
+        }
+
+        {
+            gchar *uri;
+            if(gst_uri_is_valid(a->filename))
+            {
+                uri = g_strdup(a->filename);
+            }
+            else if(g_path_is_absolute(a->filename))
+            {
+                uri = g_filename_to_uri(a->filename, NULL, NULL);
+            }
+            else
+            {
+                gchar *tmp = g_build_filename(g_get_current_dir(), a->filename, NULL);
+                uri = g_filename_to_uri(tmp, NULL, NULL);
+                g_free(tmp);
+            }
+
+            g_debug("%s", uri); //Printing
+            g_object_set(G_OBJECT(a->pipeline), "uri", uri, NULL);
+            g_free(uri);
+        }
+        g_object_set(G_OBJECT(a->videosink), "force-aspect-ratio", TRUE, NULL);
+
+
+        /*GST_STATE_CHANGE_
+         *              FAILURE = 0
+         *              SUCCESS = 1
+         *              ASYNC = 2
+         *              NO_PREROLL = 3
+         */
+        gst_element_set_state(a->pipeline, GST_STATE_PAUSED); //Have to pause first to test if it is a valid file
+        GstState current, pending;
+        GstStateChangeReturn isValidFile = gst_element_get_state(a->pipeline, &current, &pending,0);
+        std::cout << current << "|" << pending << "=" << isValidFile << std::endl;
+        if(!isValidFile)
+        {
+            delete a; return NULL;
+        }
+        //*/
+
+        return a;
+    }
+
+    void setFinishListener(AudioPlayerCallback* cbo)
+    {
+        finishListener = cbo;
     }
 };
 
