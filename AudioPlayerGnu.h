@@ -60,8 +60,9 @@ private:
 public:
     ~AudioPlayerGnu()
     {
-        delete pipeline;
-        delete videosink;
+        //TODO???
+        //delete pipeline;
+        //delete videosink;
     }
     void play()
     {
