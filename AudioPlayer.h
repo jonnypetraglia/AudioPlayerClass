@@ -31,9 +31,10 @@ public:
     virtual double progress() const = 0;
 
     virtual void setVolume(int) = 0;
-//    virtual void mute() const = 0;
-//    virtual void unmute() const = 0;
-//    virtual void toggleMute() const = 0;
+    virtual int getVolume() const = 0;
+    virtual void mute() = 0;
+    virtual void unmute() = 0;
+    virtual void toggleMute() = 0;
 
     virtual void setFinishListener(AudioPlayerCallback* cbo) = 0;
 };
