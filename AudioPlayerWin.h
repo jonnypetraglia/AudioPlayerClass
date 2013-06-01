@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <sstream>
 #include <windows.h>
-#include <Rpc.h>    //Required for GUID
-#include <iomanip>  //turning GUID to string
+  //Required for GUID
+#include <Rpc.h>
+  //turning GUID to string
+#include <iomanip>
 
 class AudioPlayerWin : public AudioPlayer
 {
