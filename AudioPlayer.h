@@ -21,6 +21,7 @@ public:
     virtual ~AudioPlayer() {}
 
     virtual void play() = 0;
+    virtual void stop() = 0;
     virtual void pause() = 0;
     virtual void seek(double t) = 0;
 
@@ -35,6 +36,9 @@ public:
     virtual void mute() = 0;
     virtual void unmute() = 0;
     virtual void toggleMute() = 0;
+
+    virtual void setBalance(int LR) = 0;
+    virtual int getBalance() const = 0;
 
     virtual void setFinishListener(AudioPlayerCallback* cbo) = 0;
 };

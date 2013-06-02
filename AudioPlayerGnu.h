@@ -11,8 +11,9 @@ class AudioPlayerGnu : public AudioPlayer
 {
 private:
     const char * filename;
-    GstElement *pipeline;
+    GstElement *player;
     GstElement *videosink;
+    GstElement *balance;
     gpointer window;
 #define seek_flags (GST_SEEK_FLAG_FLUSH|GST_SEEK_FLAG_KEY_UNIT)
     AudioPlayerCallback* finishListener;
@@ -43,6 +44,9 @@ public:
     void mute();
     void unmute();
     void toggleMute();
+
+    void setBalance(int LR); //-100 = Left, +100 = Right
+    int getBalance() const;
 
     static AudioPlayerGnu* file(const char *fn);
     void setFinishListener(AudioPlayerCallback* cbo);
