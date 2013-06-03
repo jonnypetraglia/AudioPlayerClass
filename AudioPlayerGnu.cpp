@@ -240,24 +240,16 @@ int AudioPlayerGnu::getVolume() const
 
 void AudioPlayerGnu::mute()
 {
-    if(isMuted)
+    if(!isMuted)
         g_object_set(G_OBJECT(player), "volume", 0, NULL);
     isMuted=true;
 }
 
 void AudioPlayerGnu::unmute()
 {
-    if(!isMuted)
+    if(isMuted)
         setVolume(volumeForMute);
     isMuted=false;
-}
-
-void AudioPlayerGnu::toggleMute()
-{
-    if(isMuted)
-        unmute();
-    else
-        mute();
 }
 
 #define kMinBalance -100

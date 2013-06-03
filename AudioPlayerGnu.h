@@ -43,7 +43,7 @@ public:
     int getVolume() const;
     void mute();
     void unmute();
-    void toggleMute();
+    bool isMuted() { return isMuted; }
 
     void setBalance(int LR); //-100 = Left, +100 = Right
     int getBalance() const;

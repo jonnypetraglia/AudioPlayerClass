@@ -35,7 +35,8 @@ public:
     virtual int getVolume() const = 0;
     virtual void mute() = 0;
     virtual void unmute() = 0;
-    virtual void toggleMute() = 0;
+    virtual bool isMuted() = 0;
+    void toggleMute() { if(isMuted()) unmute(); else mute(); }
 
     virtual void setBalance(int LR) = 0;
     virtual int getBalance() const = 0;

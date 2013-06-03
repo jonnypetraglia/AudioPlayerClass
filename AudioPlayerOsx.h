@@ -31,6 +31,7 @@ public:
     );
     bool load(CFURLRef url);
 
+public:
     //Super();
     bool isPlaying() const;
     bool isPaused() const;
@@ -38,9 +39,19 @@ public:
     double duration() const;
     double progress() const;
     void play();
+    void stop();
     void pause();//todo
     void seek(double sec);
     static AudioPlayerOsx* file(const char *fn);
+
+    void setVolume(int);
+    int getVolume() const;
+    void mute();
+    void unmute();
+    bool isMuted();
+
+    void setBalance(int LR);
+    int getBalance() const;
 
     void setFinishListener(AudioPlayerCallback* cbo)
     {
@@ -48,6 +59,7 @@ public:
     }
 
 private:
+    AudioPlayerOsx() : volume_level(100), _isMuted(false) {}
     void resume() const;
     void primeBuffer();
     void seekToPacket(uint64_t packet);
@@ -62,7 +74,8 @@ private:
         );
     double timeBase;
     AQPlayerState aqData;
-    bool paoosay;
+    bool paoosay, _isMuted;
+    int volume_level;
 };
 
 #endif // AUDIOPLAYEROSX_H

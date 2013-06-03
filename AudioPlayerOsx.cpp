@@ -21,20 +21,17 @@ bool AudioPlayerOsx::isStopped() const
 
 void AudioPlayerOsx::play()
 {
-    std::cout << "DERP222 " << isPlaying() << std::endl;
     if(isPlaying())
         return;
     OSStatus status;
-    std::cout << "DERP333 " << isPaused() << std::endl;
-    std::cout << "DERP444 " << isStopped() << std::endl;
-    if(isStopped() || !isPaused())
+    if(isStopped())// || !isPaused())
     {
         aqData.mIsRunning = true;                          // 1
         aqData.mCurrentPacket = 0;                                // 1
 
         primeBuffer();
 
-        Float32 gain = 1.0;                                       // 1
+        Float32 gain = volume_level/100.0;
             // Optionally, allow user to override gain setting here
         status = AudioQueueSetParameter (                                  // 2
             aqData.mQueue,                                        // 3
@@ -106,13 +103,8 @@ double AudioPlayerOsx::progress() const
 //        checkStatus(status);
 
     p = timeStamp.mSampleTime/aqData.mDataFormat.mSampleRate + timeBase;
-
     return p;
 }
-
-
-
-
 
 AudioPlayerOsx* AudioPlayerOsx::file(const char *fn) {
 
@@ -129,6 +121,64 @@ AudioPlayerOsx* AudioPlayerOsx::file(const char *fn) {
     CFRelease(url);
 
     return ap;
+}
+
+
+void AudioPlayerOsx::stop()
+{
+    AudioQueueStop(aqData.mQueue, true);
+}
+
+void AudioPlayerOsx::setVolume(int i)
+{
+    //Between 0.0 and 1.0
+    volume_level = i;
+    float macLevel = volume_level/100.0;
+    AudioQueueSetParameter(aqData.mQueue,
+                           kAudioQueueParam_Volume,
+                           macLevel
+                           );
+}
+
+int AudioPlayerOsx::getVolume() const
+{
+    AudioQueueParameterValue x;
+    AudioQueueGetParameter(aqData.mQueue,kAudioQueueParam_Volume, &x);
+    return x*100;
+}
+
+void AudioPlayerOsx::mute()
+{
+    if(!_isMuted)
+        AudioQueueSetParameter(aqData.mQueue, kAudioQueueParam_Volume, 0);
+    _isMuted=true;
+}
+
+void AudioPlayerOsx::unmute()
+{
+    if(_isMuted)
+        setVolume(volume_level);
+    _isMuted=false;
+}
+
+bool AudioPlayerOsx::isMuted()
+{
+    return _isMuted;
+}
+
+void AudioPlayerOsx::setBalance(int LR)
+{
+    float macPan = LR/100.0;
+    AudioQueueSetParameter(aqData.mQueue,
+                           kAudioQueueParam_Pan,
+                           macPan);
+}
+
+int AudioPlayerOsx::getBalance() const
+{
+    AudioQueueParameterValue x;
+    AudioQueueGetParameter(aqData.mQueue,kAudioQueueParam_Pan, &x);
+    return x*100;
 }
 
 //static
@@ -328,7 +378,6 @@ void AudioPlayerOsx::seekToPacket(uint64_t packet)
     aqData.mCurrentPacket = rand()%1000;
     primeBuffer();
     AudioQueueStart(aqData.mQueue, NULL);
-
 }
 
 
