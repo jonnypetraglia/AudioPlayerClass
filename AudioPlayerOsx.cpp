@@ -127,6 +127,7 @@ AudioPlayerOsx* AudioPlayerOsx::file(const char *fn) {
 void AudioPlayerOsx::stop()
 {
     AudioQueueStop(aqData.mQueue, true);
+    AudioQueueFlush(aqData.mQueue);
 }
 
 void AudioPlayerOsx::setVolume(int i)
@@ -375,9 +376,9 @@ void AudioPlayerOsx::primeBuffer()
 void AudioPlayerOsx::seekToPacket(uint64_t packet)
 {
     AudioQueueStop(aqData.mQueue, true);
-    aqData.mCurrentPacket = rand()%1000;
+    AudioQueueFlush(aqData.mQueue);
+    aqData.mCurrentPacket = packet;//rand()%1000;
     primeBuffer();
-    AudioQueueStart(aqData.mQueue, NULL);
 }
 
 
