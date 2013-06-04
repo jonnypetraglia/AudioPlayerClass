@@ -57,6 +57,8 @@ public:
     {
         aqData.callback = cbo;
     }
+    const static int FILETYPE_COUNT = 13;
+    const static std::string FILETYPES[];
 
 private:
     AudioPlayerOsx() : volume_level(100), _isMuted(false) {}

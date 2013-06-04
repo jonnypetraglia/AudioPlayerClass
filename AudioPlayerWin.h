@@ -27,6 +27,8 @@ public:
     void seek(double sec);
     void setFinishListener(AudioPlayerCallback* cbo);
     void setFinishListenerHWND(HWND h);
+    const static int FILETYPE_COUNT = 2;
+    const static std::string FILETYPES[];
 
 private:
     enum MediaType { MP3, WAV };

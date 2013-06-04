@@ -6,11 +6,12 @@
 #include <gst/gst.h>
 #include <gst/interfaces/xoverlay.h>
 #include <iostream>
+#include <string>
 
 class AudioPlayerGnu : public AudioPlayer
 {
 private:
-    const char * filename;
+    const char* filename;
     GstElement *player;
     GstElement *videosink;
     GstElement *balance;
@@ -18,8 +19,8 @@ private:
 #define seek_flags (GST_SEEK_FLAG_FLUSH|GST_SEEK_FLAG_KEY_UNIT)
     AudioPlayerCallback* finishListener;
     int volumeForMute;
-    bool isMuted;
-    AudioPlayerGnu() : isMuted(false) {}
+    bool _isMuted;
+    AudioPlayerGnu() : _isMuted(false) {}
 
 private:
     static gboolean bus_callback(GstBus *bus, GstMessage *msg, gpointer data);//Has to be static???
@@ -28,6 +29,9 @@ private:
     void reset();
 
 public:
+    const static int FILETYPE_COUNT;
+    const static char* FILETYPES[];
+
     ~AudioPlayerGnu();
     void play();
     void stop();
@@ -43,12 +47,12 @@ public:
     int getVolume() const;
     void mute();
     void unmute();
-    bool isMuted() { return isMuted; }
+    bool isMuted() { return _isMuted; }
 
     void setBalance(int LR); //-100 = Left, +100 = Right
     int getBalance() const;
 
-    static AudioPlayerGnu* file(const char *fn);
+    static AudioPlayerGnu* file(const char* fn);
     void setFinishListener(AudioPlayerCallback* cbo);
 };
 

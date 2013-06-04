@@ -1,5 +1,7 @@
 #include "AudioPlayerOsx.h"
 
+const std::string AudioPlayerOsx::FILETYPES[AudioPlayerOsx::FILETYPE_COUNT] = {"aac", "adts", "ac3", "aif", "aiff", "aifc", "caf", "mp3", "m4a", "snd", "au", "sd2", "wav"};
+
 #define checkStatus(status) checkStatus_(status, __FILE__, __LINE__)
 
 //Inherited

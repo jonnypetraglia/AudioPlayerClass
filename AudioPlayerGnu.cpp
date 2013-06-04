@@ -1,5 +1,8 @@
 #include "AudioPlayerGnu.h"
 
+const int AudioPlayerGnu::FILETYPE_COUNT = 8;
+const char* AudioPlayerGnu::FILETYPES[AudioPlayerGnu::FILETYPE_COUNT] = {"wav", "mp3", "aif", "mp4", "wma", "b-mtp", "ogg", "spx"};
+
 ///////////////////////////Private
 
 gboolean AudioPlayerGnu::bus_callback(GstBus *bus, GstMessage *msg, gpointer callingGnu)
@@ -138,7 +141,7 @@ bool AudioPlayerGnu::isStopped() const
      *  GST_STATE_PAUSED = 3
      *  GST_STATE_PLAYING = 4
      */
-AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
+AudioPlayerGnu* AudioPlayerGnu::file(const char* fn)
 {
     AudioPlayerGnu* a = new AudioPlayerGnu();
     a->init(NULL, NULL);
@@ -148,7 +151,6 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
     g_object_set(G_OBJECT(a->player), "video-sink", a->videosink, NULL);    //discard video
 
 
-    //if(1==2)
     {
         GstElement *audiosink = gst_element_factory_make("alsasink",
                                                          "audiosink");
@@ -164,7 +166,6 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
           gst_element_add_pad(audiobin, gst_ghost_pad_new("sink", sinkpad));
           gst_object_unref(GST_OBJECT(sinkpad));
           audiosink = audiobin;
-          std::cout << "dad" << std::endl;
         }
 
         // Set audio-sink to our new audiosink.
@@ -180,24 +181,24 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
     }
 
     {
-        gchar *uri;
-        if(gst_uri_is_valid(a->filename))
+        gchar *uri = g_locale_to_utf8(a->filename,-1,NULL,NULL,NULL); //This fixes the Unicode problem
+        if(gst_uri_is_valid( uri))
         {
-            uri = g_strdup(a->filename);
+            uri = g_strdup(uri);
         }
-        else if(g_path_is_absolute(a->filename))
+        else if(g_path_is_absolute(uri))
         {
-            uri = g_filename_to_uri(a->filename, NULL, NULL);
+            uri = g_filename_to_uri(uri, NULL, NULL);
         }
         else
         {
-            gchar *tmp = g_build_filename(g_get_current_dir(), a->filename, NULL);
+            gchar *tmp = g_build_filename(g_get_current_dir(), uri, NULL);
             uri = g_filename_to_uri(tmp, NULL, NULL);
             g_free(tmp);
         }
 
         g_debug("%s", uri); //Printing
-        g_object_set(G_OBJECT(a->player), "uri", uri, NULL);
+        g_object_set(G_OBJECT(a->player), "uri", "file:///mnt/Tera/notbryant/Curmudgeon-build/Yael%20Na%C3%AFm.mp3", NULL);
         g_free(uri);
     }
 
@@ -240,16 +241,16 @@ int AudioPlayerGnu::getVolume() const
 
 void AudioPlayerGnu::mute()
 {
-    if(!isMuted)
+    if(!_isMuted)
         g_object_set(G_OBJECT(player), "volume", 0, NULL);
-    isMuted=true;
+    _isMuted=true;
 }
 
 void AudioPlayerGnu::unmute()
 {
-    if(isMuted)
+    if(_isMuted)
         setVolume(volumeForMute);
-    isMuted=false;
+    _isMuted=false;
 }
 
 #define kMinBalance -100

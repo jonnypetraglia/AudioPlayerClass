@@ -1,5 +1,7 @@
 #include "AudioPlayerWin.h"
 
+const std::string AudioPlayerGnu::FILETYPES[AudioPlayerGnu::FILETYPE_COUNT] = {"mp3", "wav"};
+
 /////////////////////////PUBLIC/////////////////////////
 
 AudioPlayerWin::~AudioPlayerWin()

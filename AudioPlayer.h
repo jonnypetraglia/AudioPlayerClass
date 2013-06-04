@@ -14,12 +14,11 @@
  */
 
 #include "AudioPlayerCallback.h"
+#include <string>
 
 class AudioPlayer {
 public:
     //static AudioPlayer* url(const char* url);
-    virtual ~AudioPlayer() {}
-
     virtual void play() = 0;
     virtual void stop() = 0;
     virtual void pause() = 0;
@@ -42,6 +41,8 @@ public:
     virtual int getBalance() const = 0;
 
     virtual void setFinishListener(AudioPlayerCallback* cbo) = 0;
+
+    const static char* FILETYPES[];
 };
 
 
