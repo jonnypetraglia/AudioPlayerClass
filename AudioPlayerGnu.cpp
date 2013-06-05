@@ -114,7 +114,6 @@ bool AudioPlayerGnu::isPlaying() const
 {
     GstState current, pending;
     gst_element_get_state(player, &current, &pending,0);
-    std::cout << "derp " << current << "==" << GST_STATE_PLAYING << " (" << pending << ")" << std::endl;
     return current==GST_STATE_PLAYING;
 }
 
@@ -122,7 +121,6 @@ bool AudioPlayerGnu::isPaused() const
 {
     GstState current, pending;
     gst_element_get_state(player, &current, &pending,0);
-    std::cout << "derp " << current << "==" << GST_STATE_PAUSED << " (" << pending << ")" << std::endl;
     return current==GST_STATE_PAUSED;
 }
 
@@ -130,7 +128,6 @@ bool AudioPlayerGnu::isStopped() const
 {
     GstState current, pending;
     gst_element_get_state(player, &current, &pending,0);
-    std::cout << "derp " << current << "==" << GST_STATE_NULL << " (" << pending << ")" << std::endl;
     return current==GST_STATE_NULL;
 }
 
@@ -141,7 +138,9 @@ bool AudioPlayerGnu::isStopped() const
      *  GST_STATE_PAUSED = 3
      *  GST_STATE_PLAYING = 4
      */
-AudioPlayerGnu* AudioPlayerGnu::file(const char* fn)
+std::string x;
+#include <locale.h>
+AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
 {
     AudioPlayerGnu* a = new AudioPlayerGnu();
     a->init(NULL, NULL);
@@ -181,24 +180,30 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char* fn)
     }
 
     {
-        gchar *uri = g_locale_to_utf8(a->filename,-1,NULL,NULL,NULL); //This fixes the Unicode problem
-        if(gst_uri_is_valid( uri))
+
+        gchar* uri;
+        if(gst_uri_is_valid(fn))
         {
-            uri = g_strdup(uri);
+            std::cout << "AudioPlayerGnu[" << 1 << "]: ";
+            uri = g_strdup(g_locale_to_utf8(fn, -1, NULL, NULL, NULL));
         }
-        else if(g_path_is_absolute(uri))
+        else if(g_path_is_absolute(fn))
         {
-            uri = g_filename_to_uri(uri, NULL, NULL);
+            std::cout << "AudioPlayerGnu[" << 2 << "]: ";
+            uri = g_filename_to_uri(g_locale_to_utf8(fn, -1, NULL, NULL, NULL), NULL, NULL);
         }
         else
         {
-            gchar *tmp = g_build_filename(g_get_current_dir(), uri, NULL);
-            uri = g_filename_to_uri(tmp, NULL, NULL);
+            std::cout << "AudioPlayerGnu[" << 3 << "]: ";
+            gchar *tmp = g_build_filename(g_get_current_dir(), fn, NULL);
+            uri = g_filename_to_uri(g_locale_to_utf8(tmp, -1, NULL, NULL, NULL), NULL, NULL);
             g_free(tmp);
         }
 
+        std::cout << uri << std::endl;
+
         g_debug("%s", uri); //Printing
-        g_object_set(G_OBJECT(a->player), "uri", "file:///mnt/Tera/notbryant/Curmudgeon-build/Yael%20Na%C3%AFm.mp3", NULL);
+        g_object_set(G_OBJECT(a->player), "uri", uri, NULL);
         g_free(uri);
     }
 

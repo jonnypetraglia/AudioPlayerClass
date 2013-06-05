@@ -52,7 +52,7 @@ public:
     void setBalance(int LR); //-100 = Left, +100 = Right
     int getBalance() const;
 
-    static AudioPlayerGnu* file(const char* fn);
+    static AudioPlayerGnu* file(const char *fn);
     void setFinishListener(AudioPlayerCallback* cbo);
 };
 
