@@ -1,6 +1,7 @@
 #include "AudioPlayerOsx.h"
 
-const std::string AudioPlayerOsx::FILETYPES[AudioPlayerOsx::FILETYPE_COUNT] = {"aac", "adts", "ac3", "aif", "aiff", "aifc", "caf", "mp3", "m4a", "snd", "au", "sd2", "wav"};
+const int AudioPlayerOsx::FILETYPE_COUNT = 13;
+const char* AudioPlayerOsx::FILETYPES[AudioPlayerOsx::FILETYPE_COUNT] = {"aac", "adts", "ac3", "aif", "aiff", "aifc", "caf", "mp3", "m4a", "snd", "au", "sd2", "wav"};
 
 #define checkStatus(status) checkStatus_(status, __FILE__, __LINE__)
 
@@ -21,10 +22,10 @@ bool AudioPlayerOsx::isStopped() const
     return !aqData.mIsRunning;
 }
 
-void AudioPlayerOsx::play()
+bool AudioPlayerOsx::play()
 {
     if(isPlaying())
-        return;
+        return false;
     OSStatus status;
     if(isStopped())// || !isPaused())
     {
@@ -49,6 +50,7 @@ void AudioPlayerOsx::play()
         NULL                                           // 4
     );
     checkStatus(status);
+    return status<0;
 }
 
 void AudioPlayerOsx::pause()

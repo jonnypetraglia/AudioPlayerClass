@@ -38,7 +38,7 @@ public:
     bool isStopped() const;
     double duration() const;
     double progress() const;
-    void play();
+    bool play();
     void stop();
     void pause();//todo
     void seek(double sec);
@@ -57,8 +57,8 @@ public:
     {
         aqData.callback = cbo;
     }
-    const static int FILETYPE_COUNT = 13;
-    const static std::string FILETYPES[];
+    const static int FILETYPE_COUNT;
+    const static char* FILETYPES[];
 
 private:
     AudioPlayerOsx() : volume_level(100), _isMuted(false) {}
