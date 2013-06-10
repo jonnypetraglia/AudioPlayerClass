@@ -33,7 +33,7 @@ public:
     const static char* FILETYPES[];
 
     ~AudioPlayerGnu();
-    void play();
+    bool play();
     void stop();
     void pause();
     void seek(double t);

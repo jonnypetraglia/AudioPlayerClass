@@ -1,7 +1,7 @@
 #include "AudioPlayerGnu.h"
 
-const int AudioPlayerGnu::FILETYPE_COUNT = 8;
-const char* AudioPlayerGnu::FILETYPES[AudioPlayerGnu::FILETYPE_COUNT] = {"wav", "mp3", "aif", "mp4", "wma", "b-mtp", "ogg", "spx"};
+const int AudioPlayerGnu::FILETYPE_COUNT = 9;
+const char* AudioPlayerGnu::FILETYPES[AudioPlayerGnu::FILETYPE_COUNT] = {"wav", "mp3", "aif", "aiff", "mp4", "wma", "b-mtp", "ogg", "spx"};
 
 ///////////////////////////Private
 
@@ -22,7 +22,6 @@ gboolean AudioPlayerGnu::bus_callback(GstBus *bus, GstMessage *msg, gpointer cal
         g_free(debug);
         g_warning("Error: %s", err->message);
         g_error_free(err);
-        std::cerr << "ERROR" << std::endl;
         break;
     default:
         break;
@@ -54,12 +53,11 @@ AudioPlayerGnu::~AudioPlayerGnu()
     //delete videosink;
 }
 
-void AudioPlayerGnu::play()
+bool AudioPlayerGnu::play()
 {
-    //stop();
     if(GST_IS_X_OVERLAY(videosink))
         gst_x_overlay_set_xwindow_id(GST_X_OVERLAY(videosink), GPOINTER_TO_INT(window));
-    gst_element_set_state(player, GST_STATE_PLAYING);
+    return gst_element_set_state(player, GST_STATE_PLAYING) == GST_STATE_CHANGE_FAILURE;
 }
 
 void AudioPlayerGnu::stop() //TODO
@@ -184,23 +182,18 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
         gchar* uri;
         if(gst_uri_is_valid(fn))
         {
-            std::cout << "AudioPlayerGnu[" << 1 << "]: ";
             uri = g_strdup(g_locale_to_utf8(fn, -1, NULL, NULL, NULL));
         }
         else if(g_path_is_absolute(fn))
         {
-            std::cout << "AudioPlayerGnu[" << 2 << "]: ";
             uri = g_filename_to_uri(g_locale_to_utf8(fn, -1, NULL, NULL, NULL), NULL, NULL);
         }
         else
         {
-            std::cout << "AudioPlayerGnu[" << 3 << "]: ";
             gchar *tmp = g_build_filename(g_get_current_dir(), fn, NULL);
             uri = g_filename_to_uri(g_locale_to_utf8(tmp, -1, NULL, NULL, NULL), NULL, NULL);
             g_free(tmp);
         }
-
-        std::cout << uri << std::endl;
 
         g_debug("%s", uri); //Printing
         g_object_set(G_OBJECT(a->player), "uri", uri, NULL);
@@ -217,9 +210,13 @@ AudioPlayerGnu* AudioPlayerGnu::file(const char *fn)
     GstState current, pending;
     GstStateChangeReturn isValidFile = gst_element_get_state(a->player, &current, &pending,0);
 
-    if(!isValidFile)
+//    for(long int i=0; i<100000 && isValidFile==2; i++)
+//        isValidFile = gst_element_get_state(a->player, &current, &pending,0);
+    if(isValidFile==2)
+        isValidFile = GST_STATE_CHANGE_SUCCESS;
+    if(isValidFile!=1)
     {
-        delete a; return NULL;
+        delete a; a=NULL;
     }
 
     return a;
