@@ -22,19 +22,30 @@ public:
     bool isStopped() const;
     double duration() const;
     double progress() const;
-    void play();
+    bool play();
+    void stop();
     void pause();
     void seek(double sec);
+    void setVolume(int percentage);
+    int getVolume() const;
+    void mute();
+    void unmute();
+    bool isMuted() { return _isMuted; }
+    void setBalance(int LR); //-100 = Left, +100 = Right
+    int getBalance() const;
     void setFinishListener(AudioPlayerCallback* cbo);
     void setFinishListenerHWND(HWND h);
-    const static int FILETYPE_COUNT = 2;
-    const static std::string FILETYPES[];
+    const static int FILETYPE_COUNT;
+    const static char* FILETYPES[];
 
 private:
     enum MediaType { MP3, WAV };
     MediaType mType;
     AudioPlayerCallback* finishListener;
     std::string alias;
+    bool _isMuted;
+    int leftBalance, rightBalance;
+    int mainVolume;
 
     bool LoadMP3(std::string &command);
     bool LoadWAV(std::string &command);
